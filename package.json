@@ -1,0 +1,12 @@
+{
+  "name": "star-wars-snake",
+  "version": "1.0.0",
+  "description": "A browser-based Star Wars themed Snake game built with Phaser.js.",
+  "private": true,
+  "scripts": {
+    "start": "npx http-server . -c-1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
