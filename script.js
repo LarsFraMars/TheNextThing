@@ -21,8 +21,9 @@ let starfield = [];
 let audioContext = null;
 let explosionParticles = [];
 let rAFId = null;
+let planets = [];
 
-// Initialize starfield
+// Initialize starfield with planets
 function initStarfield() {
   starfield = [];
   for (let i = 0; i < 150; i++) {
@@ -34,6 +35,13 @@ function initStarfield() {
       opacity: Math.random() * 0.6 + 0.4
     });
   }
+  
+  // Add planets
+  planets = [
+    { x: 100, y: 150, radius: 30, color: '#ff6b35', vx: 0.05, vy: 0.03 },
+    { x: 500, y: 400, radius: 45, color: '#f7931e', vx: 0.02, vy: 0.08 },
+    { x: 450, y: 100, radius: 25, color: '#004e89', vx: 0.08, vy: 0.02 }
+  ];
 }
 
 // Audio initialization
@@ -43,62 +51,82 @@ function initAudio() {
   }
 }
 
-// Play synth music loop with multiple instruments
+// Play synth music loop with multiple instruments - Fun and energetic!
 function playSynthMusic() {
   initAudio();
   const now = audioContext.currentTime;
   
-  // Bass line
+  // Energetic bass line with bouncy rhythm
   const bass = audioContext.createOscillator();
   const bassGain = audioContext.createGain();
   bass.type = 'square';
   bass.connect(bassGain);
   bassGain.connect(audioContext.destination);
   
-  const bassNotes = [65.41, 73.42, 82.41, 73.42]; // C2, D2, E2, D2
-  const noteDuration = 0.3;
+  // Fun bass pattern - bouncy!
+  const bassNotes = [65.41, 82.41, 65.41, 110.00, 82.41, 65.41, 146.83, 110.00];
+  const noteDuration = 0.2;
   
-  for (let i = 0; i < 8; i++) {
-    bass.frequency.setValueAtTime(bassNotes[i % 4], now + i * noteDuration);
-    bassGain.gain.setValueAtTime(0.03, now + i * noteDuration);
-    bassGain.gain.setValueAtTime(0, now + i * noteDuration + noteDuration * 0.8);
+  for (let i = 0; i < 12; i++) {
+    bass.frequency.setValueAtTime(bassNotes[i % 8], now + i * noteDuration);
+    bassGain.gain.setValueAtTime(0.04, now + i * noteDuration);
+    bassGain.gain.setValueAtTime(0, now + i * noteDuration + noteDuration * 0.7);
   }
   
   bass.start(now);
-  bass.stop(now + noteDuration * 8);
+  bass.stop(now + noteDuration * 12);
   
-  // Melody line
+  // Fun melody line - playful!
   const melody = audioContext.createOscillator();
   const melodyGain = audioContext.createGain();
-  melody.type = 'triangle';
+  melody.type = 'sawtooth';
   melody.connect(melodyGain);
   melodyGain.connect(audioContext.destination);
   
-  const melodyNotes = [261.63, 293.66, 329.63, 349.23, 392.00, 349.23, 329.63, 293.66]; // C4, D4, E4, F4, G4, F4, E4, D4
+  // Playful ascending melody
+  const melodyNotes = [523.25, 587.33, 659.25, 783.99, 659.25, 587.33, 523.25, 659.25, 783.99, 880.00, 783.99, 659.25];
   
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 12; i++) {
     melody.frequency.setValueAtTime(melodyNotes[i], now + i * noteDuration);
-    melodyGain.gain.setValueAtTime(0.04, now + i * noteDuration);
-    melodyGain.gain.setValueAtTime(0, now + i * noteDuration + noteDuration * 0.8);
+    melodyGain.gain.setValueAtTime(0.05, now + i * noteDuration);
+    melodyGain.gain.setValueAtTime(0, now + i * noteDuration + noteDuration * 0.7);
   }
   
   melody.start(now);
-  melody.stop(now + noteDuration * 8);
+  melody.stop(now + noteDuration * 12);
   
-  // Harmony/pad
+  // Harmony pad - adds fullness
   const pad = audioContext.createOscillator();
   const padGain = audioContext.createGain();
   pad.type = 'sine';
   pad.connect(padGain);
   padGain.connect(audioContext.destination);
   
-  pad.frequency.setValueAtTime(130.81, now);
-  padGain.gain.setValueAtTime(0.02, now);
-  padGain.gain.setValueAtTime(0.02, now + noteDuration * 8 - 0.1);
-  padGain.gain.setValueAtTime(0, now + noteDuration * 8);
+  pad.frequency.setValueAtTime(196.00, now);
+  padGain.gain.setValueAtTime(0.03, now);
+  padGain.gain.setValueAtTime(0.03, now + noteDuration * 12 - 0.1);
+  padGain.gain.setValueAtTime(0, now + noteDuration * 12);
   
   pad.start(now);
-  pad.stop(now + noteDuration * 8);
+  pad.stop(now + noteDuration * 12);
+  
+  // Random fun blips for extra pizzazz
+  for (let b = 0; b < 3; b++) {
+    setTimeout(() => {
+      const blip = audioContext.createOscillator();
+      const blipGain = audioContext.createGain();
+      blip.type = 'triangle';
+      blip.connect(blipGain);
+      blipGain.connect(audioContext.destination);
+      
+      const blipFreq = 1200 + Math.random() * 800;
+      blip.frequency.setValueAtTime(blipFreq, audioContext.currentTime);
+      blipGain.gain.setValueAtTime(0.02, audioContext.currentTime);
+      blipGain.gain.setValueAtTime(0, audioContext.currentTime + 0.1);
+      blip.start(audioContext.currentTime);
+      blip.stop(audioContext.currentTime + 0.1);
+    }, Math.random() * 1500);
+  }
   
   setTimeout(() => playSynthMusic(), 2400);
 }
@@ -119,16 +147,39 @@ function playSound(frequency = 440, duration = 0.1) {
   osc.stop(audioContext.currentTime + duration);
 }
 
-// Explosion effect
-function createExplosion(x, y) {
-  for (let i = 0; i < 12; i++) {
+// Explosion effect - MASSIVE and visual!
+function createExplosion(x, y, intensity = 1) {
+  const particleCount = Math.floor(25 * intensity);
+  
+  for (let i = 0; i < particleCount; i++) {
+    const angle = (Math.PI * 2 * i) / particleCount;
+    const speed = (Math.random() * 4 + 3) * intensity;
+    
     explosionParticles.push({
       x: x,
       y: y,
-      vx: (Math.random() - 0.5) * 4,
-      vy: (Math.random() - 0.5) * 4,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
       life: 1,
-      color: ['#ff6b6b', '#ffd93d', '#ff2d2d', '#ffaa00'][Math.floor(Math.random() * 4)]
+      maxLife: 1,
+      color: ['#ffff00', '#ff6b00', '#ff0000', '#ffaa00', '#ffffff'][Math.floor(Math.random() * 5)],
+      size: Math.random() * 6 + 3
+    });
+  }
+  
+  // Shockwave rings
+  for (let ring = 0; ring < 2; ring++) {
+    explosionParticles.push({
+      x: x,
+      y: y,
+      vx: 0,
+      vy: 0,
+      life: 0.8,
+      maxLife: 0.8,
+      isRing: true,
+      size: 5 + ring * 10,
+      expandSpeed: (15 + ring * 8) * intensity,
+      color: '#ffff00'
     });
   }
 }
@@ -141,6 +192,33 @@ function drawStarfield() {
     
     ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
     ctx.fillRect(star.x, star.y, star.size, star.size);
+  });
+  
+  // Draw planets
+  planets.forEach(planet => {
+    planet.x += planet.vx;
+    planet.y += planet.vy;
+    
+    // Wrap around edges
+    if (planet.x < -50) planet.x = canvas.width + 50;
+    if (planet.x > canvas.width + 50) planet.x = -50;
+    if (planet.y < -50) planet.y = canvas.height + 50;
+    if (planet.y > canvas.height + 50) planet.y = -50;
+    
+    // Draw planet
+    ctx.fillStyle = planet.color;
+    ctx.beginPath();
+    ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Planet ring/glow
+    ctx.strokeStyle = planet.color;
+    ctx.globalAlpha = 0.3;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(planet.x, planet.y, planet.radius + 5, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
   });
 }
 
@@ -165,19 +243,37 @@ function drawPortals() {
   ctx.globalAlpha = 1;
 }
 
-// Draw explosions
+// Draw explosions - MASSIVE VISUALS!
 function drawExplosions() {
   explosionParticles = explosionParticles.filter(p => p.life > 0);
   explosionParticles.forEach(p => {
-    p.x += p.vx;
-    p.y += p.vy;
-    p.vy += 0.1; // gravity
-    p.life -= 0.05;
-    
-    ctx.fillStyle = p.color;
-    ctx.globalAlpha = p.life;
-    ctx.fillRect(p.x, p.y, 4, 4);
-    ctx.globalAlpha = 1;
+    if (p.isRing) {
+      // Draw expanding ring
+      p.size += p.expandSpeed;
+      p.life -= 0.08;
+      
+      ctx.strokeStyle = p.color;
+      ctx.globalAlpha = p.life;
+      ctx.lineWidth = Math.max(1, 3 * p.life);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    } else {
+      // Regular particles
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.2; // gravity
+      p.life -= 0.06;
+      
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.life * 0.8;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 10;
+      ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+    }
   });
 }
 
@@ -294,14 +390,51 @@ function draw() {
   // SuperMario
   drawSuperMario(superMario.x, superMario.y, superMario.blinking, superMario.blinkTimer);
 
-  // Snake - Yellow body with red head
+  // Snake - Yellow body with red head, drawn as actual snake!
   snake.forEach((segment, index) => {
+    const x = segment.x * gridSize;
+    const y = segment.y * gridSize;
+    
     if (index === 0) {
+      // Snake head - red with eyes!
       ctx.fillStyle = '#ff2d2d';
+      ctx.beginPath();
+      ctx.arc(x + gridSize/2, y + gridSize/2, gridSize/2 - 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Eyes
+      ctx.fillStyle = '#ffffff';
+      const eyeSize = 2;
+      const eyeY = y + gridSize/3;
+      
+      // Determine head direction for eye placement
+      let eyeX1 = x + gridSize/3;
+      let eyeX2 = x + 2*gridSize/3;
+      if (velocity.x < 0) { eyeX1 = x + gridSize/4; eyeX2 = x + gridSize/4 + 2; }
+      else if (velocity.x > 0) { eyeX1 = x + 3*gridSize/4; eyeX2 = x + 3*gridSize/4 + 2; }
+      else if (velocity.y < 0) { eyeX1 = x + gridSize/3; eyeX2 = x + 2*gridSize/3; }
+      
+      ctx.fillRect(eyeX1 - eyeSize, eyeY - eyeSize, eyeSize*2, eyeSize*2);
+      ctx.fillRect(eyeX2 - eyeSize, eyeY - eyeSize, eyeSize*2, eyeSize*2);
+      
+      // Tongue
+      ctx.strokeStyle = '#ff6b6b';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x + gridSize/2, y + 2*gridSize/3);
+      ctx.lineTo(x + gridSize/2 + 5, y + gridSize - 2);
+      ctx.stroke();
     } else {
-      ctx.fillStyle = '#ffff00';
+      // Body segments - yellow, slightly transparent based on distance
+      const opacity = 1 - (index / snake.length) * 0.4;
+      ctx.fillStyle = `rgba(255, 255, 0, ${opacity})`;
+      ctx.fillRect(x + 1, y + 1, gridSize - 2, gridSize - 2);
+      
+      // Segment outlines for definition
+      ctx.strokeStyle = `rgba(200, 200, 0, ${opacity * 0.6})`;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x + 1, y + 1, gridSize - 2, gridSize - 2);
     }
-    ctx.fillRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
   });
 
   // Explosions
@@ -405,8 +538,14 @@ function update() {
   if (wrappedHead.x === deathStar.x && wrappedHead.y === deathStar.y) {
     score += 5;
     scoreElem.textContent = score;
-    playSound(880, 0.1);
-    createExplosion((deathStar.x + 0.5) * gridSize, (deathStar.y + 0.5) * gridSize);
+    
+    // MASSIVE explosion for DeathStar!
+    createExplosion((deathStar.x + 0.5) * gridSize, (deathStar.y + 0.5) * gridSize, 2);
+    
+    // Cool explosion sound
+    playSound(880, 0.3);
+    playSound(440, 0.2);
+    
     spawnDeathStar();
     foodEaten = true;
   }
@@ -414,8 +553,15 @@ function update() {
   if (wrappedHead.x === superMario.x && wrappedHead.y === superMario.y && !superMario.blinking) {
     score += 10;
     scoreElem.textContent = score;
+    
+    // MEGA explosion for SuperMario!
+    createExplosion((superMario.x + 0.5) * gridSize, (superMario.y + 0.5) * gridSize, 3);
+    
+    // Fun victory sound
+    playSound(1320, 0.1);
+    playSound(1760, 0.1);
     playSound(1320, 0.15);
-    createExplosion((superMario.x + 0.5) * gridSize, (superMario.y + 0.5) * gridSize);
+    
     superMario.blinking = true;
     superMario.blinkTimer = 80;
     foodEaten = true;
