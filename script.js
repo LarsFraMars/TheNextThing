@@ -390,16 +390,25 @@ function draw() {
   // SuperMario
   drawSuperMario(superMario.x, superMario.y, superMario.blinking, superMario.blinkTimer);
 
-  // Snake - Yellow body with red head, drawn as actual snake!
+  // Snake - Yellow body with red head, drawn as actual snake with scales!
   snake.forEach((segment, index) => {
     const x = segment.x * gridSize;
     const y = segment.y * gridSize;
     
     if (index === 0) {
-      // Snake head - red with eyes!
+      // Snake head - red with eyes and pattern!
       ctx.fillStyle = '#ff2d2d';
       ctx.beginPath();
       ctx.arc(x + gridSize/2, y + gridSize/2, gridSize/2 - 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Head pattern scales
+      ctx.fillStyle = 'rgba(200, 0, 0, 0.5)';
+      ctx.beginPath();
+      ctx.arc(x + gridSize/2 - 3, y + gridSize/2 + 3, 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x + gridSize/2 + 3, y + gridSize/2 + 3, 2, 0, Math.PI * 2);
       ctx.fill();
       
       // Eyes
@@ -417,23 +426,64 @@ function draw() {
       ctx.fillRect(eyeX1 - eyeSize, eyeY - eyeSize, eyeSize*2, eyeSize*2);
       ctx.fillRect(eyeX2 - eyeSize, eyeY - eyeSize, eyeSize*2, eyeSize*2);
       
+      // Eyes pupils
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(eyeX1, eyeY, 1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(eyeX2, eyeY, 1, 0, Math.PI * 2);
+      ctx.fill();
+      
       // Tongue
       ctx.strokeStyle = '#ff6b6b';
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(x + gridSize/2, y + 2*gridSize/3);
       ctx.lineTo(x + gridSize/2 + 5, y + gridSize - 2);
       ctx.stroke();
     } else {
-      // Body segments - yellow, slightly transparent based on distance
-      const opacity = 1 - (index / snake.length) * 0.4;
+      // Body segments - yellow with scales pattern
+      const opacity = 1 - (index / snake.length) * 0.3;
       ctx.fillStyle = `rgba(255, 255, 0, ${opacity})`;
-      ctx.fillRect(x + 1, y + 1, gridSize - 2, gridSize - 2);
+      
+      // Draw rounded body segments with curves
+      ctx.beginPath();
+      ctx.moveTo(x + 4, y + 1);
+      ctx.lineTo(x + gridSize - 4, y + 1);
+      ctx.quadraticCurveTo(x + gridSize - 1, y + 1, x + gridSize - 1, y + 4);
+      ctx.lineTo(x + gridSize - 1, y + gridSize - 4);
+      ctx.quadraticCurveTo(x + gridSize - 1, y + gridSize - 1, x + gridSize - 4, y + gridSize - 1);
+      ctx.lineTo(x + 4, y + gridSize - 1);
+      ctx.quadraticCurveTo(x + 1, y + gridSize - 1, x + 1, y + gridSize - 4);
+      ctx.lineTo(x + 1, y + 4);
+      ctx.quadraticCurveTo(x + 1, y + 1, x + 4, y + 1);
+      ctx.fill();
+      
+      // Segment detail scales
+      ctx.fillStyle = `rgba(200, 200, 0, ${opacity * 0.4})`;
+      for (let sy = 0; sy < 3; sy++) {
+        for (let sx = 0; sx < 3; sx++) {
+          ctx.beginPath();
+          ctx.arc(x + 5 + sx * 8, y + 5 + sy * 8, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
       
       // Segment outlines for definition
-      ctx.strokeStyle = `rgba(200, 200, 0, ${opacity * 0.6})`;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x + 1, y + 1, gridSize - 2, gridSize - 2);
+      ctx.strokeStyle = `rgba(200, 200, 0, ${opacity * 0.8})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x + 4, y + 1);
+      ctx.lineTo(x + gridSize - 4, y + 1);
+      ctx.quadraticCurveTo(x + gridSize - 1, y + 1, x + gridSize - 1, y + 4);
+      ctx.lineTo(x + gridSize - 1, y + gridSize - 4);
+      ctx.quadraticCurveTo(x + gridSize - 1, y + gridSize - 1, x + gridSize - 4, y + gridSize - 1);
+      ctx.lineTo(x + 4, y + gridSize - 1);
+      ctx.quadraticCurveTo(x + 1, y + gridSize - 1, x + 1, y + gridSize - 4);
+      ctx.lineTo(x + 1, y + 4);
+      ctx.quadraticCurveTo(x + 1, y + 1, x + 4, y + 1);
+      ctx.stroke();
     }
   });
 
@@ -546,6 +596,11 @@ function update() {
     playSound(880, 0.3);
     playSound(440, 0.2);
     
+    // Grow snake by 4 segments for each Death Star!
+    for (let i = 0; i < 4; i++) {
+      snake.push({...snake[snake.length - 1]});
+    }
+    
     spawnDeathStar();
     foodEaten = true;
   }
@@ -561,6 +616,11 @@ function update() {
     playSound(1320, 0.1);
     playSound(1760, 0.1);
     playSound(1320, 0.15);
+    
+    // Grow snake by 6 segments for each SuperMario!
+    for (let i = 0; i < 6; i++) {
+      snake.push({...snake[snake.length - 1]});
+    }
     
     superMario.blinking = true;
     superMario.blinkTimer = 80;
